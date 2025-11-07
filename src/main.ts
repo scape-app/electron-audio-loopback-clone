@@ -5,7 +5,7 @@ import { type InitMainOptions } from './types.js';
 
 export const initMain = (options: InitMainOptions = {}): void => {
     const {
-        forceCoreAudioTap = false,
+        forceCoreAudioTap = true, // Default to CoreAudio taps to avoid ScreenCaptureKit keyboard interference
         loopbackWithMute = false,
         onAfterGetSources,
         sessionOverride,

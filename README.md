@@ -110,7 +110,7 @@ If you don't want to remove the video tracks, you can pass `removeVideo: false` 
 
 - `initMain(options?: InitMainOptions)`: Initialize the plugin in the main process. Must be called before the app is ready.
   - `sourcesOptions`: The options to pass to the `desktopCapturer.getSources` method.
-  - `forceCoreAudioTap`: Whether to force the use of the Core Audio API on macOS (can be used to bypass bugs for certain macOS versions).
+  - `forceCoreAudioTap`: Whether to use CoreAudio taps (default: `true`) instead of ScreenCaptureKit. CoreAudio taps require macOS 14.2+ but don't interfere with global keyboard shortcuts. Set to `false` for macOS 12.3-14.1 support (may interfere with apps like Raycast/Alfred).
   - `loopbackWithMute`: Whether to use the loopback audio with mute. Defaults to `false`.
   - `sessionOverride`: The session to override. Defaults to `session.defaultSession`.
   - `onAfterGetSources`: A function that is called after the sources are retrieved. Useful for advanced & unique scenarios. Defaults to `undefined`.
@@ -130,7 +130,8 @@ The plugin registers these IPC handlers automatically, ensure you don't override
 ## Requirements
 
 - Electron >= 31.0.1 (this is cruicial, older Electron versions will not work!)
-- macOS 12.3+
+- macOS 14.2+ (uses CoreAudio taps by default to avoid keyboard shortcut interference)
+  - For macOS 12.3-14.1, set `forceCoreAudioTap: false` to use ScreenCaptureKit (may interfere with global shortcuts)
 - Windows 10+
 - Most Linux distros with PulseAudio as a sound server
 
