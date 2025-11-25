@@ -113,7 +113,23 @@ On macOS 14.2+, this plugin automatically uses **Core Audio Taps** instead of Sc
 | 14.2+ | Core Audio Taps | Recommended, no keyboard shortcut issues |
 | 12.3 - 14.1 | ScreenCaptureKit | Only option available on these versions |
 
-If you're on macOS 12.3-14.1 and experiencing keyboard shortcut issues, unfortunately there's no workaround as Core Audio Taps aren't available on those versions.
+### Required Info.plist Keys
+
+For **macOS 14.2+** (Core Audio Taps), you must add this key to your app's `Info.plist`:
+
+```xml
+<key>NSAudioCaptureUsageDescription</key>
+<string>This app needs access to system audio for recording.</string>
+```
+
+For **macOS 12.3 - 14.1** (ScreenCaptureKit), you need screen recording permission:
+
+```xml
+<key>NSScreenCaptureUsageDescription</key>
+<string>This app needs screen recording access to capture system audio.</string>
+```
+
+**Note:** If you're targeting both old and new macOS versions, include both keys in your Info.plist.
 
 ## API Reference
 
