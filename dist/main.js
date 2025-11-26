@@ -103,6 +103,17 @@ const initMain = (options = {}) => {
     electron_1.ipcMain.handle(config_js_1.ipcEvents.enableLoopbackAudio, () => {
         const session = sessionOverride || electron_1.session.defaultSession;
         session.setDisplayMediaRequestHandler(async (_, callback) => {
+            const audioType = loopbackWithMute ? config_js_1.loopbackAudioTypes.loopbackWithMute : config_js_1.loopbackAudioTypes.loopback;
+            // When using Core Audio Taps on macOS 14.2+, we don't need to call
+            // desktopCapturer.getSources() which requires Screen Recording permission.
+            // We can pass audio-only to the callback.
+            if (useCoreAudioTap && process.platform === 'darwin') {
+                callback({
+                    audio: audioType,
+                });
+                return;
+            }
+            // For ScreenCaptureKit or other platforms, we need a video source
             let sources;
             try {
                 sources = await electron_1.desktopCapturer.getSources(sourcesOptions);
@@ -121,7 +132,7 @@ const initMain = (options = {}) => {
             }
             callback({
                 video: sources[0],
-                audio: loopbackWithMute ? config_js_1.loopbackAudioTypes.loopbackWithMute : config_js_1.loopbackAudioTypes.loopback,
+                audio: audioType,
             });
         });
     });
