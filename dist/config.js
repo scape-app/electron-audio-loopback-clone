@@ -15,20 +15,23 @@ const defaultFeatureFlags = {
     pulseaudioLoopbackForScreenShare: 'PulseaudioLoopbackForScreenShare',
     macLoopbackAudioForScreenShare: 'MacLoopbackAudioForScreenShare',
 };
-const coreAudioTapFeatureFlags = {
-    macCoreAudioTapSystemAudioLoopbackOverride: 'MacCatapSystemAudioLoopbackCapture',
-};
+// Note: The MacCatapSystemAudioLoopbackCapture flag is expired in modern Chromium.
+// Core Audio Taps is now the default when only MacLoopbackAudioForScreenShare is set.
 const screenCaptureKitFeatureFlags = {
     macScreenCaptureKitSystemAudioLoopbackOverride: 'MacSckSystemAudioLoopbackOverride',
 };
 const buildFeatureFlags = ({ otherEnabledFeatures, forceCoreAudioTap, }) => {
     const featureFlags = [...Object.values(defaultFeatureFlags), ...(otherEnabledFeatures ?? [])];
-    if (forceCoreAudioTap) {
-        featureFlags.push(coreAudioTapFeatureFlags.macCoreAudioTapSystemAudioLoopbackOverride);
-    }
-    else {
+    // On macOS 14.2+, Chromium uses Core Audio Taps by default when only
+    // MacLoopbackAudioForScreenShare is set. We don't need to add the
+    // MacCatapSystemAudioLoopbackCapture flag (which is expired/broken).
+    // Only add ScreenCaptureKit flag when explicitly NOT using Core Audio Taps.
+    if (!forceCoreAudioTap) {
         featureFlags.push(screenCaptureKitFeatureFlags.macScreenCaptureKitSystemAudioLoopbackOverride);
     }
+    // When forceCoreAudioTap is true (or auto-detected on macOS 14.2+),
+    // we just use MacLoopbackAudioForScreenShare alone - Chromium will
+    // automatically use Core Audio Taps as the default implementation.
     return featureFlags.join(',');
 };
 exports.buildFeatureFlags = buildFeatureFlags;
