@@ -54,6 +54,16 @@ export const initMain = (options: InitMainOptions = {}): void => {
     // interference with system keyboard shortcuts (Raycast, global hotkeys, etc.)
     const useCoreAudioTap = forceCoreAudioTap ?? shouldUseCoreAudioTaps();
 
+    // Debug logging to verify which audio capture method is being used
+    console.log('[electron-audio-loopback] Audio capture configuration:', {
+        platform: process.platform,
+        darwinVersion: process.platform === 'darwin' ? require('os').release() : 'N/A',
+        forceCoreAudioTap,
+        autoDetectedCoreAudioTap: shouldUseCoreAudioTaps(),
+        useCoreAudioTap,
+        method: useCoreAudioTap ? 'Core Audio Taps' : 'ScreenCaptureKit',
+    });
+
     // Get other enabled features from the command line.
     const otherEnabledFeatures = app.commandLine.getSwitchValue(featureSwitchKey)?.split(',');
 
@@ -69,6 +79,8 @@ export const initMain = (options: InitMainOptions = {}): void => {
     });
 
     app.commandLine.appendSwitch(featureSwitchKey, currentFeatureFlags);
+
+    console.log('[electron-audio-loopback] Feature flags set:', currentFeatureFlags);
 
     // Handle the enable loopback audio event.
     ipcMain.handle(ipcEvents.enableLoopbackAudio, () => {

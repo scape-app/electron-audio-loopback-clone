@@ -77,6 +77,15 @@ const initMain = (options = {}) => {
     // Use Core Audio Taps by default on macOS 14.2+ to avoid ScreenCaptureKit's
     // interference with system keyboard shortcuts (Raycast, global hotkeys, etc.)
     const useCoreAudioTap = forceCoreAudioTap ?? shouldUseCoreAudioTaps();
+    // Debug logging to verify which audio capture method is being used
+    console.log('[electron-audio-loopback] Audio capture configuration:', {
+        platform: process.platform,
+        darwinVersion: process.platform === 'darwin' ? require('os').release() : 'N/A',
+        forceCoreAudioTap,
+        autoDetectedCoreAudioTap: shouldUseCoreAudioTaps(),
+        useCoreAudioTap,
+        method: useCoreAudioTap ? 'Core Audio Taps' : 'ScreenCaptureKit',
+    });
     // Get other enabled features from the command line.
     const otherEnabledFeatures = electron_1.app.commandLine.getSwitchValue(config_js_1.featureSwitchKey)?.split(',');
     // Remove the switch if it exists.
@@ -89,6 +98,7 @@ const initMain = (options = {}) => {
         forceCoreAudioTap: useCoreAudioTap,
     });
     electron_1.app.commandLine.appendSwitch(config_js_1.featureSwitchKey, currentFeatureFlags);
+    console.log('[electron-audio-loopback] Feature flags set:', currentFeatureFlags);
     // Handle the enable loopback audio event.
     electron_1.ipcMain.handle(config_js_1.ipcEvents.enableLoopbackAudio, () => {
         const session = sessionOverride || electron_1.session.defaultSession;
