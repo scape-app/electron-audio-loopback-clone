@@ -89,17 +89,7 @@ export const initMain = (options: InitMainOptions = {}): void => {
         session.setDisplayMediaRequestHandler(async (_, callback) => {
             const audioType = loopbackWithMute ? loopbackAudioTypes.loopbackWithMute : loopbackAudioTypes.loopback;
 
-            // When using Core Audio Taps on macOS 14.2+, we don't need to call
-            // desktopCapturer.getSources() which requires Screen Recording permission.
-            // We can pass audio-only to the callback.
-            if (useCoreAudioTap && process.platform === 'darwin') {
-                callback({
-                    audio: audioType,
-                });
-                return;
-            }
-
-            // For ScreenCaptureKit or other platforms, we need a video source
+            // We need a video source for the callback since getDisplayMedia requires video: true
             let sources: DesktopCapturerSource[];
 
             try {

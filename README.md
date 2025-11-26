@@ -113,23 +113,18 @@ On macOS 14.2+, this plugin automatically uses **Core Audio Taps** instead of Sc
 | 14.2+ | Core Audio Taps | Recommended, no keyboard shortcut issues |
 | 12.3 - 14.1 | ScreenCaptureKit | Only option available on these versions |
 
-### Required Info.plist Keys
+### Required Permissions
 
-For **macOS 14.2+** (Core Audio Taps), you must add this key to your app's `Info.plist`:
+Both Core Audio Taps and ScreenCaptureKit require **Screen Recording permission** because the library needs to call `desktopCapturer.getSources()` to satisfy Electron's `getDisplayMedia` API.
 
-```xml
-<key>NSAudioCaptureUsageDescription</key>
-<string>This app needs access to system audio for recording.</string>
-```
-
-For **macOS 12.3 - 14.1** (ScreenCaptureKit), you need screen recording permission:
+Add this key to your app's `Info.plist`:
 
 ```xml
 <key>NSScreenCaptureUsageDescription</key>
 <string>This app needs screen recording access to capture system audio.</string>
 ```
 
-**Note:** If you're targeting both old and new macOS versions, include both keys in your Info.plist.
+**Why does this still fix keyboard shortcuts?** The keyboard shortcut interference is caused by ScreenCaptureKit's **audio capture**, not by getting screen sources. When using Core Audio Taps on macOS 14.2+, the audio is captured through a different API that doesn't interfere with system hotkeys.
 
 ## API Reference
 
