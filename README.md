@@ -104,13 +104,35 @@ audioElement.play();
 
 If you don't want to remove the video tracks, you can pass `removeVideo: false` to the `getLoopbackAudioMediaStream` function.
 
+## macOS Compatibility Notes
+
+On macOS 14.2+, this plugin automatically uses **Core Audio Taps** instead of ScreenCaptureKit for audio loopback. This prevents issues where ScreenCaptureKit can interfere with system keyboard shortcuts and global hotkeys (like Raycast).
+
+| macOS Version | Audio Capture Method | Notes |
+|---------------|---------------------|-------|
+| 14.2+ | Core Audio Taps | Recommended, no keyboard shortcut issues |
+| 12.3 - 14.1 | ScreenCaptureKit | Only option available on these versions |
+
+### Required Permissions
+
+Both Core Audio Taps and ScreenCaptureKit require **Screen Recording permission** because the library needs to call `desktopCapturer.getSources()` to satisfy Electron's `getDisplayMedia` API.
+
+Add this key to your app's `Info.plist`:
+
+```xml
+<key>NSScreenCaptureUsageDescription</key>
+<string>This app needs screen recording access to capture system audio.</string>
+```
+
+**Why does this still fix keyboard shortcuts?** The keyboard shortcut interference is caused by ScreenCaptureKit's **audio capture**, not by getting screen sources. When using Core Audio Taps on macOS 14.2+, the audio is captured through a different API that doesn't interfere with system hotkeys.
+
 ## API Reference
 
 ### Main Process Functions
 
 - `initMain(options?: InitMainOptions)`: Initialize the plugin in the main process. Must be called before the app is ready.
   - `sourcesOptions`: The options to pass to the `desktopCapturer.getSources` method.
-  - `forceCoreAudioTap`: Whether to force the use of the Core Audio API on macOS (can be used to bypass bugs for certain macOS versions).
+  - `forceCoreAudioTap`: Force the use of Core Audio Taps instead of ScreenCaptureKit. **Defaults to `true` on macOS 14.2+** to avoid keyboard shortcut issues. Set to `false` to force ScreenCaptureKit.
   - `loopbackWithMute`: Whether to use the loopback audio with mute. Defaults to `false`.
   - `sessionOverride`: The session to override. Defaults to `session.defaultSession`.
   - `onAfterGetSources`: A function that is called after the sources are retrieved. Useful for advanced & unique scenarios. Defaults to `undefined`.
